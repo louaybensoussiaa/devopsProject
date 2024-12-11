@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  mysqldb:
+    image: mysql:5.7
+    restart: unless-stopped
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: intership
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      mynetwork:
+        # Specify the desired fixed IP address
+  app:
+    depends_on:
+      - mysqldb
+   # build: ./
+    image: wassimmanai/achat-image:1.0.9
+    restart: on-failure
+    ports:
+      - "8089:8089"
+    volumes:
+      - .m2:/root/.m2
+
+    stdin_open: true
+    tty: true
+    networks:
+      mynetwork:
+         # Specify a different fixed IP address
+
+  app-angular:
+    depends_on:
+      - app
+    build: ./foyer
+    ports:
+      - "4200:4200"
+    restart: on-failure
+
+
+volumes:
+  db:
+networks:
+  mynetwork:
+    driver: bridge
